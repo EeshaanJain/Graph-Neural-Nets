@@ -1,0 +1,74 @@
+\documentclass[nobib]{tufte-handout}
+
+\title{Graph Representation Learning
+       \thanks{William L. Hamilton} \\
+       \Large Notes\thanks{Authors: Eeshaan Jain}}
+
+\date{Winter 2021} % without \date command, current date is supplied
+
+%\geometry{showframe} % display margins for debugging page layout
+
+\usepackage{graphicx} % allow embedded images
+  \setkeys{Gin}{width=\linewidth,totalheight=\textheight,keepaspectratio}
+  \graphicspath{{notes1/fig/}} % set of paths to search for images
+\usepackage{amsmath}  % extended mathematics
+\usepackage{thmbox}
+\usepackage{amstext}  % extended text
+\usepackage{amsfonts}  % extended text
+\usepackage{booktabs} % book-quality tables
+\usepackage{units}    % non-stacked fractions and better unit spacing
+\usepackage{multicol} % multiple column layout facilities
+\usepackage{lipsum}   % filler text
+\usepackage{fancyvrb} % extended verbatim environments
+\usepackage{placeins}
+\usepackage{sty/kbordermatrix}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tocloft}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+
+\hypersetup{
+	colorlinks,
+	citecolor=violet,
+	linkcolor=red,
+	urlcolor=blue}
+
+  \fvset{fontsize=\normalsize}% default font size for fancy-verbatim environments
+
+% Standardize command font styles and environments
+\newcommand{\doccmd}[1]{\texttt{\textbackslash#1}}% command name -- adds backslash automatically
+\newcommand{\docopt}[1]{\ensuremath{\langle}\textrm{\textit{#1}}\ensuremath{\rangle}}% optional command argument
+\newcommand{\docarg}[1]{\textrm{\textit{#1}}}% (required) command argument
+\newcommand{\docenv}[1]{\textsf{#1}}% environment name
+\newcommand{\docpkg}[1]{\texttt{#1}}% package name
+\newcommand{\doccls}[1]{\texttt{#1}}% document class name
+\newcommand{\docclsopt}[1]{\texttt{#1}}% document class option name
+\newenvironment{docspec}{\begin{quote}\noindent}{\end{quote}}% command specification environment
+\newcommand{\argmin}{\operatornamewithlimits{argmin}}
+\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+\newcommand{\textunderscript}[1]{$_{\text{#1}}$}
+
+\setcounter{secnumdepth}{3}
+\newtheorem[M]{definition}{Definition}[section]
+
+\begin{document}
+
+\maketitle% this prints the handout title, author, and date
+
+%\printclassoptions
+
+
+\textbf{Keyphrases: Graph Representation Learning. Graph Statistics. Graph Embeddings. Graph Neural Networks. Graph Generative Models.}
+
+This set of notes begin by introducing graphs, and learning tasks on it. [Introduction will be updated as file is updated.]
+\tableofcontents
+
+\include{chapter1}
+
+
+\nocite{*}
+\footnotesize
+\bibliographystyle{apalike}
+\bibliography{notes1/reference}
+
+\end{document}

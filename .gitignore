@@ -1,4 +1,11 @@
 env.bat
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.syntex.gz
+*.toc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
