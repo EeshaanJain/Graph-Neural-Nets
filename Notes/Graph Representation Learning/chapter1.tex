@@ -59,6 +59,11 @@ Usually we have features representing graph-level features - may it be on nodes,
 
 Now, let's go over some common graphical learning tasks.
 \subsection{Node Classification}
+	\begin{marginfigure}
+	\includegraphics[width=\textwidth]{node-classification.png}
+	\caption{Example of node classification. Source: \cite{node-classification-survey}}
+	\label{fig:node-classification}
+\end{marginfigure}
 The goal of node classification is to predict a label $y_u$ associated with all nodes $u \in V$ when we have been only given the true labels of a subset of the nodes $V_{train} \subset V$. A few examples in literature of the task are:
 \begin{enumerate}
 	\item Interactome protein function classification: \cite{graphsage}
@@ -66,5 +71,32 @@ The goal of node classification is to predict a label $y_u$ associated with all 
 \end{enumerate}
 Though it seems similar to supervised classification, there is a difficulty that the nodes in a graph are not \textit{i.i.d.} and thus we need to model dependencies between data points. This is exactly what node classification takes a benefit of through 
 \begin{enumerate}
-	\item \textbf{Homophily:}
+	\item \textbf{Homophily} \cite{homophily}: Tendency of nodes to share attributes with their neighbors
+	\item \textbf{Structural Equivalence} \cite{structural-equivalence}: Idea that nodes with similar local neighborhood structures will have similar labels
+	\item \textbf{Heterophily}: Presumption that nodes will be preferentially connected to differently-labeled nodes
 \end{enumerate}
+Note that, the only part of the network we don't access is the labels of the test nodes. We still have access to the structural information, and thus our task is \textbf{semi-supervised}.
+\subsection{Link Prediction}
+This task is related to the inference of edges between nodes in a graph. Given a set of nodes $V$ and an incomplete set of edges $E_{train} \subset E$, we want to infer the set $E \setminus E_{train}$. A few examples in literature of the task are:
+\begin{marginfigure}
+	\includegraphics[width=\textwidth]{link-prediction.png}
+	\caption{Example of node classification. Source: \href{https://www.analyticsvidhya.com/blog/2020/01/link-prediction-how-to-predict-your-future-connections-on-facebook/}{AnalyticsVidhya}}
+	\label{fig:link-prediction}
+\end{marginfigure}
+\begin{enumerate}
+	\item Content recommendation on social media: \cite{link-prediction-content}
+	\item Modeling side-effects of drugs: \cite{link-prediction-side-effects}
+\end{enumerate}
+Although for simple graphs, we can have simple heuristics to give decent results \cite{link-prediction-survey-heuristic}, the task on multi-relational graphs is much more complex. \\
+Much like node classification, the task boundary is smudged, and it falls under both supervised and unsupervised.
+\subsection{Community Detection}
+This task is the graphical analog of unsupervised learning. We want to infer latent community structures given only the input graph $G = (V, E)$. A few examples in literature of the task are:
+\begin{enumerate}
+	\item Uncovering functional modules in genetic interaction networks: \cite{community-detection-genetic}
+	\item Fraud detection in financial transaction networks: \cite{community-detection-fraud}
+\end{enumerate}
+\subsection{Other popular graphical tasks}
+\begin{itemize}
+	\item[$\diamond$] \textbf{Graph Regression / Graph Classification}: In these tasks, we want to learn over graph data, and our dataset consists of multiple different graphs and we predict graph-wise. We can treat each graph as i.i.d and thus, the only challenge is to define useful features over graphs.
+	\item[$\diamond$] \textbf{Graph Clustering} In this task, we learn an unsupervised measure of similarity between pairs of graphs.
+\end{itemize}

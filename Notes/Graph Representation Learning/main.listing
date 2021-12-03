@@ -1,0 +1,3 @@
+1. Assign an initial label $\ell^{(0)}(v)$ to each node. A usual practice is to just assign the degree.
+2. Iteratively assign a new label by hashing the multiset of current labels within the neighborhood $\ell^{(i)}(v) = \texttt{HASH}(\{\{\ell^{(i-1)}(u)\;\forall\;u \in \mathcal{N}(v)\}\})$
+3. After running $K$ iterations of step-2, our label summarizes a $K$-hop neighborhood. Now use statistics of labels as features for the graphs.
