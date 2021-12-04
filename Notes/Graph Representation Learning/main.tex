@@ -14,8 +14,14 @@
 \usepackage{thmbox}
 \usepackage{amstext}  % extended text
 \usepackage{amsfonts}  % extended text
+\usepackage{amssymb}
 \usepackage{booktabs} % book-quality tables
 \usepackage{units}    % non-stacked fractions and better unit spacing
+\usepackage{mathtools, stmaryrd}
+\usepackage{xparse} \DeclarePairedDelimiterX{\Iintv}[1]{\llbracket}{\rrbracket}{\iintvargs{#1}}
+\NewDocumentCommand{\iintvargs}{>{\SplitArgument{1}{,}}m}
+{\iintvargsaux#1} %
+\NewDocumentCommand{\iintvargsaux}{mm} {#1\mkern1.5mu..\mkern1.5mu#2}
 \usepackage{multicol} % multiple column layout facilities
 \usepackage{lipsum}   % filler text
 \usepackage{fancyvrb} % extended verbatim environments
@@ -91,11 +97,12 @@
 
 \textbf{Keyphrases: Graph Representation Learning. Graph Statistics. Graph Kernel Methods. Graph Embeddings. Graph Neural Networks. Graph Generative Models.}
 
-This set of notes begin by introducing graphs, and learning tasks on it. Then we discuss the traditional approaches to infer graphs at the node-level and graph-level and further see inter-node relations. This extends to Spectral Graph Theory and use of Graph Laplacians to perform optimal clustering. [Introduction will be updated as file is updated.]
+This set of notes begin by introducing graphs, and learning tasks on it. Then we discuss the traditional approaches to infer graphs at the node-level and graph-level and further see inter-node relations. This extends to Spectral Graph Theory and use of Graph Laplacians to perform optimal clustering. An overview of shallow embeddings is done using matrix factorization and random walks on simple graphs, whose idea is extended to multi-relational graphs.[Introduction will be updated as file is updated.]
 \tableofcontents
 
 \include{chapter1}
 \include{chapter2}
+\include{chapter3}
 
 
 \nocite{*}
