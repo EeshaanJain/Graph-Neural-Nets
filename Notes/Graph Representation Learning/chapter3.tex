@@ -105,3 +105,78 @@ and $\mathbf{S}[u,v] = A_{uv}$. Along with that, a second objective is the decod
 	\item[$\diamond$] They do not leverage node features in \texttt{ENC}.
 	\item[$\diamond$] They are transductive, and thus it is difficult to generate embeddings for newer nodes and cannot be used in inductive applications which involve generalization.
 \end{itemize}
+\marginnote{\textbf{Knowledge Graphs}: They are multi-relational graphs $G = (V,E)$ with edges defined as tuples $e = (u, \tau, v)$ indicating the presence of a relation $\tau \in \mathcal{R}$ between two nodes. The task of knowledge graph completion is generally to predict the missing edges in the graph.}
+\subsection{Reconstruction of Multi-Relational Data}
+Multi-relational graphs add a relation type, and to address that, we make the decoder multi-relational, i.e $\texttt{DEC}: \mathbb{R}^d \times \mathcal{R} \times \mathbb{R}^d \to \mathbb{R}^+$.
+\textbf{RESCAL} \cite{rescal} defines the multi-relational decoder as $\texttt{DEC}(u, \tau, v) = \mathbf{z}_u^T \mathbf{R}_\tau \mathbf{z}_v$, where $\mathbf{R}_\tau$ is a learnable matrix for relation $\tau \in \mathcal{R}$, and we can learn $\mathbf{Z}$ and $\mathbf{R}_\tau$ using a simple reconstruction loss 
+\begin{equation} \label{eq:mr-recon-loss}
+\mathcal{L} = \sum_{u\in V} \sum_{v\in V} \sum_{\tau \in \mathcal{R}} ||\mathbf{z}_u^T \mathbf{R}_\tau \mathbf{z}_v - \mathcal{A}_{u\tau v}||^2]
+\end{equation}
+As seen above, it is a common practice to define the similarity measure based on the adjacency tensor, and thus we are trying to reconstruct immediate neighbors from the embeddings. \\
+\begin{enumerate}
+\item \textbf{Loss Functions}: The loss defined in Equation (\ref{eq:mr-recon-loss}) requires $\mathcal{O}(|V|^2|\mathcal{R}|)$ time complexity, and is extremely expensive. Since it is realistically seen that multi-relational graphs are sparse, we would want a loss function of the order $\mathcal{O}(|E|)$. Also, since our target is to decode the adjacency tensor, which has binary values, we can't use the simple MSE loss.
+\begin{enumerate}
+	\item \textbf{Cross-Entropy with Negative Sampling}: Defining $\sigma$ as the sigmoid function, $P_{n,u}(V)$ as the negative sampling distribution, and $\gamma > 0$, we write
+	\begin{equation}
+	\begin{split}
+	\mathcal{L} = \sum_{(u, \tau, v) \in E}\bigg(& -\log(\sigma(\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_v))) \\&- \gamma \mathbb{E}_{v_n \sim P_{n, u}(V)}[\log(\sigma(-\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_{v_n})))] \bigg)
+	\end{split}
+	\end{equation}
+If we calculate the expectation using Monte Carlo Sampling, we can write by sampling over a small subet $\mathcal{P}_{n,u} \subset P_{n,u}(V)$
+\begin{equation}
+\mathcal{L} = -\sum_{(u, \tau, v) \in E}\log(\sigma(\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_v)))	- \sum_{v_n \in \mathcal{P}_{n, u}}\log(\sigma(-\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_{v_n})))
+\end{equation}
+	\item \textbf{Max-Margin Loss}: Also called the \textit{hinge loss}, we set a margin $\Delta$ and use \textit{contrastive estimation} (but with direct comparison of output of the decoders) to write the loss function as
+	\begin{equation}
+		\mathcal{L} = \sum_{(u, \tau, v) \in E} \sum_{v_n \in \mathcal{P}_{n, u}} \max(0, -\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_v) + \texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_{v_n}) + \Delta)
+	\end{equation}
+\end{enumerate}
+\item \textbf{Decoders}:
+\begin{enumerate}
+	\item \textbf{RESCAL}: In the RESCAL decoder, a trainable matrix $\mathbf{R}_\tau \in \mathbb{R}^{d \times d}$ is associated with each relation
+	\begin{equation}
+		\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_v) = \mathbf{z}_u^T \mathbf{R}_\tau \mathbf{z}_v
+	\end{equation}
+	 This gives rise to $\mathcal{O}(d^2)$ number of parameters for each relation, and that has high computational cost. Recent decoders aim to get $\mathcal{O}(d)$ number of parameters.
+	 \item \textbf{Translational Decoders}: Such decoders represent relations as translations in embedding space. 
+	 \begin{enumerate}
+	 	\item \textbf{TransE} \cite{transe}: Using a $d$-dimensional embedding, the decoder is
+	 	\begin{equation}
+	 		\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_v) = -||\mathbf{z}_u + \mathbf{r}_\tau - \mathbf{z}_v||
+	 	\end{equation}
+ 	It is a simple decoder, and the likelihood of an edge is proportional to the distance translated according to the relation.
+ 	\item \textbf{TransX}: These are a class of models built upon the TransE model, and have the general form
+ 	\begin{equation}
+ 		\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_v) = -||g_{1, \tau}(\mathbf{z}_u) + \mathbf{r}_\tau - g_{2,\tau}(\mathbf{z}_v)||
+ 	\end{equation}
+ where $g_{i,\tau}$ are trainable transformations. \cite{transh} proposed the TransH model which projects the entity embeddings onto a learnable relation-specific hyperplane defined by the normal vector $\mathbf{w}_r$ and then translating it.
+ \begin{equation}
+ 	\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_v) = -||(\mathbf{z}_u - \mathbf{w}_r^T \mathbf{z}_u \mathbf{w}_r) + \mathbf{r}_\tau - (\mathbf{z}_v - \mathbf{w}_r^T \mathbf{z}_v \mathbf{w}_r)||
+ \end{equation}
+	 \end{enumerate}
+ \item \textbf{DistMult} \cite{distmult}: This generalizes the dot-product decoder from simple graphs, thus
+ \begin{equation}
+ 	\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_v) = \langle \mathbf{z}_u, \mathbf{r}_\tau, \mathbf{z}_v \rangle = \sum_{i=1}^d \mathbf{z}_u[i] \times \mathbf{r}_\tau[i] \times \mathbf{z}_v[i]
+ \end{equation}
+This has a restriction, that it can only be used for symmetric relations, but majority of the relation are assymetric.
+\item \textbf{ComplEx} \cite{complex}: This extends the above idea and uses complex-valued embeddings, to bring in asymmetry, i.e $\mathbf{z}_u, \mathbf{r}_\tau, \mathbf{z}_v \in \mathbb{C}^d$.
+ \begin{equation}
+	\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_v) = \Re\langle \mathbf{z}_u, \mathbf{r}_\tau, \bar{\mathbf{z}}_v \rangle =\Re\bigg( \sum_{i=1}^d \mathbf{z}_u[i] \times \mathbf{r}_\tau[i] \times \bar{\mathbf{z}}_v[i]\bigg)
+\end{equation}
+\item \textbf{RotatE} \cite{rotate}: This is again a complex-valued decoder, with the constraint that $|\mathbf{r}_\tau[i]| = 1 \implies \mathbf{r}_\tau[i] =e^{\iota \theta_{r, i}}$. This brings in rotations in the complex plane, and 
+\begin{equation}
+	\texttt{DEC}(\mathbf{z}_u, \tau, \mathbf{z}_v) = - || \mathbf{z}_u \circ \mathbf{r}_\tau - \mathbf{z}_v||
+\end{equation}
+\end{enumerate}
+\end{enumerate}
+\subsection{Representation Abilities of Multi-Relational Decoders}
+We characterize the representation abilities of the multi-relational decoders in three ways:
+\marginnote{Symmetric relations mean that \[ (u, \tau, v) \in E \leftrightarrow (v, \tau, u) \in E\]
+Anti-symmetric relations mean that \[ (u, \tau, v) \in E \rightarrow (v, \tau, u) \notin E\]}
+\begin{itemize}
+	\item[$\diamond$] \textbf{Symmetry}: Can different decoders model both symmetric and anti-symmetric relations? DistMult can only model symmetric, while TransE can only model anti-symmetric, while all others are seen to model both.
+	\marginnote{Inversion means that \[ (u, \tau_1, v) \in E\leftrightarrow (v, \tau_2, u) \in E\]}
+	\item[$\diamond$] \textbf{Inversion}: Most decoders can model inversion, though TransX and DistMult fail in this respect.
+	\marginnote{Compositionality means that \[(u, \tau_1, y) \in E \land (y, \tau_2, v) \in E \rightarrow (u, \tau_3, v) \in E\]}
+	\item[$\diamond$] \textbf{Compositionality}: It is seen that in RESCAL, defining $\mathbf{R}_{\tau_3} = \mathbf{R}_{\tau_1}\mathbf{R}_{\tau_2}$ and in TransE defining $\mathbf{r}_{\tau_3} = \mathbf{r}_{\tau_1} + \mathbf{r}_{\tau_2}$ allows modeling of compositionality. RotateE also models it, while the rest three decoders we saw fail to do so.
+\end{itemize}

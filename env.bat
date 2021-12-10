@@ -1,1 +1,0 @@
-D:\virtual_enviroments\pytorch_env\Scripts\activate
